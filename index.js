@@ -2,58 +2,53 @@ const express = require('express');
 const cors = require('cors');
 const dbConnect = require('./DataBase/db.js');
 const cloudinary = require('cloudinary').v2;
-
-
 require('dotenv').config();
 
-// DB Connect
+// Initialize database connection
 dbConnect();
 
-// cloudinary
+// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET_KEY,
 });
 
-
 const app = express();
 
-// middleware to handle json
+// Middleware to parse JSON bodies
 app.use(express.json());
 
-const base_array = [
-  'https://airbnb-clone-mern.netlify.app/',
-  'http://localhost:9090',
-];
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+  // Example of more restrictive CORS configuration
+  // origin: function (origin, callback) {
+  //   const baseArray = [
+  //     'https://airbnb-clone-mern.netlify.app/',
+  //     'http://localhost:9090',
+  //   ];
+  //   if (baseArray.includes(origin)) {
+  //     callback(null, true);
+  //   } else {
+  //     callback(new Error('Not allowed by CORS'));
+  //   }
+  // },
+  // exposedHeaders: ['set-cookie'],
+}));
 
-// CORS 
-app.use(
-  cors({
-    credentials: true,
-    origin: function (origin, callback) {
-      if (base_array.indexOf(origin !== -1)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by cors'));
-      }
-    },
-    exposedHeaders: ['set-cookie'],
-  })
-);
+// Routes
+app.use('/', require('./Routes'));
 
-// use express router
-// app.use('/uploads', express.static(__dirname+'/uploads'));
-app.use('/', require("./Routes"));
-
-
-
-
-app.listen(process.env.PORT, (err) => {
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, (err) => {
   if (err) {
-    console.log('Unable to connect the server: ', err);
+    console.error('Unable to connect to the server:', err);
+    return;
   }
-  console.log(`Server is running on port no: ${process.env.PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
 
 module.exports = app;

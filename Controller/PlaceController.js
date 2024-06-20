@@ -30,22 +30,19 @@ exports.addPlace = async (req, res) => {
       maxGuests,
       price,
     });
-    res.status(200).json({
-      place,
-    });
+
+    res.status(200).json({ place });
   } catch (err) {
-    res.send({ Err: err });
+    res.status(500).json({ error: err.message });
   }
 };
 
 exports.getPlaces = async (req, res) => {
   try {
     const places = await Places.find();
-    res.status(200).json({
-      places,
-    });
+    res.status(200).json({ places });
   } catch (err) {
-    res.send({ Err: err });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -68,26 +65,31 @@ exports.updatePlace = async (req, res) => {
     } = req.body;
 
     const place = await Places.findById(id);
-    if (userId === place.owner.toString()) {
-      place.set({
-        title,
-        address,
-        photos: addedPhotos,
-        description,
-        perks,
-        extraInfo,
-        checkIn,
-        checkOut,
-        maxGuests,
-        price,
-      });
-      await place.save();
-      res.status(200).json({
-        message: 'Place details updated!',
-      });
+    if (!place) {
+      return res.status(404).json({ message: 'Place not found' });
     }
+
+    if (userId !== place.owner.toString()) {
+      return res.status(403).json({ message: 'Unauthorized access' });
+    }
+
+    place.set({
+      title,
+      address,
+      photos: addedPhotos,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxGuests,
+      price,
+    });
+
+    await place.save();
+    res.status(200).json({ message: 'Place details updated!' });
   } catch (err) {
-    res.send({ Err: err });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -96,56 +98,57 @@ exports.singlePlace = async (req, res) => {
     const { id } = req.params;
     const place = await Places.findById(id);
     if (!place) {
-      return res.status(400).json({
-        message: 'Place not found',
-      });
+      return res.status(404).json({ message: 'Place not found' });
     }
-    res.status(200).json({
-      place,
-    });
+    res.status(200).json({ place });
   } catch (err) {
-    res.send({ Err: err });
+    res.status(500).json({ error: err.message });
   }
 };
 
 exports.userPlaces = async (req, res) => {
   try {
     const userData = userToken(req);
-    //console.log("USERDATA===>",userData)
     const id = userData.id;
-    // const temp = await Places.find({ owner: id })
-    res.status(200).json(await Places.find({ owner: id }));
+    const userPlaces = await Places.find({ owner: id });
+    res.status(200).json({ userPlaces });
   } catch (err) {
-    res.send({ Err: err });
+    res.status(500).json({ error: err.message });
   }
 };
 
 exports.searchPlaces = async (req, res) => {
   try {
-    const searchword = req.params.key;
+    const { key } = req.params;
 
-    if (searchword === '') return res.status(200).json(await Places.find())
+    if (key === '') {
+      return res.status(400).json({ message: 'Search key cannot be empty' });
+    }
 
-    const searchMatches = await Places.find({ address: { $regex: searchword, $options: "i" } })
+    const searchMatches = await Places.find({
+      address: { $regex: key, $options: 'i' },
+    });
 
-    res.status(200).json(searchMatches);
+    res.status(200).json({ searchMatches });
   } catch (err) {
-    console.log(err)
-    res.send({ Err: err });
+    res.status(500).json({ error: err.message });
   }
-}
+};
 
 exports.searchHotels = async (req, res) => {
   try {
-    const searchword = req.params.key;
+    const { key } = req.params;
 
-    if (searchword === '') return res.status(200).json(await Places.find())
+    if (key === '') {
+      return res.status(400).json({ message: 'Search key cannot be empty' });
+    }
 
-    const searchMatches = await Places.find({ title: { $regex: searchword, $options: "i" } })
+    const searchMatches = await Places.find({
+      title: { $regex: key, $options: 'i' },
+    });
 
-    res.status(200).json(searchMatches);
+    res.status(200).json({ searchMatches });
   } catch (err) {
-    console.log(err)
-    res.send({ Err: err });
+    res.status(500).json({ error: err.message });
   }
-}
+};

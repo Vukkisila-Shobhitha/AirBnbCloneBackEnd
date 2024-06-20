@@ -1,7 +1,6 @@
 const User = require("../Schema/User");
 const bcrypt = require("bcryptjs");
 const userToken = require("../Token/userToken");
-
 const jwt = require("jsonwebtoken");
 
 exports.signup = async (req, res) => {
@@ -18,7 +17,7 @@ exports.signup = async (req, res) => {
 
     if (user) {
       return res.status(400).json({
-        message: "User registered already",
+        message: "User already registered",
       });
     }
 
@@ -29,12 +28,16 @@ exports.signup = async (req, res) => {
     });
 
     res.status(200).json({
-      user,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+      },
     });
   } catch (err) {
     res.status(500).json({
       message: "Internal server Error",
-      error: err,
+      error: err.message,
     });
   }
 };
@@ -54,15 +57,20 @@ exports.signin = async (req, res) => {
           }
         );
 
+        // Do not send sensitive information like password in response
         user.password = undefined;
 
         res.status(200).json({
-          user,
+          user: {
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+          },
           token,
         });
       } else {
         res.status(401).json({
-          message: "email or password is incorrect",
+          message: "Email or password is incorrect",
         });
       }
     } else {
@@ -73,7 +81,7 @@ exports.signin = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       message: "Internal server Error",
-      error: err,
+      error: err.message,
     });
   }
 };
@@ -90,13 +98,14 @@ exports.userprofile = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       message: "Internal server Error",
-      error: err,
+      error: err.message,
     });
   }
 };
 
 exports.signout = async (req, res) => {
-  res.cookie("token", "").json({
+  // Clear token cookie upon signout
+  res.clearCookie("token").json({
     message: "Signed out successfully!",
   });
 };

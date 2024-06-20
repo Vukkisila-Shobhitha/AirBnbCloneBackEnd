@@ -1,22 +1,19 @@
 const express = require('express');
-const imageDownloader = require('image-downloader');
 const router = express.Router();
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 
-// multer
+// multer configuration
 const upload = multer({ dest: '/tmp' });
 
-
-
+// Welcome route
 router.get('/', (req, res) => {
   res.status(200).json({
     greeting: 'Welcome to Airbnb_Clone',
   });
 });
 
-
-// upload photo using image url
+// Upload photo using image URL
 router.post('/upload-by-link', async (req, res) => {
   try {
     const { link } = req.body;
@@ -25,12 +22,12 @@ router.post('/upload-by-link', async (req, res) => {
     });
     res.json(result.secure_url);
   } catch (error) {
-    console.log(error);
-    res.send({Err :error});
+    console.log('Error: ', error);
+    res.status(500).send({ Err: error });
   }
 });
 
-// upload images from local device
+// Upload images from local device
 router.post('/upload', upload.array('photos', 100), async (req, res) => {
   try {
     let imageArray = [];
@@ -46,12 +43,11 @@ router.post('/upload', upload.array('photos', 100), async (req, res) => {
     res.status(200).json(imageArray);
   } catch (error) {
     console.log('Error: ', error);
-    res.send({Err :error});
+    res.status(500).send({ Err: error });
   }
 });
 
-
-//Base Routers
+// Base Routers
 router.use('/user', require('./User'));
 router.use('/places', require('./Place'));
 router.use('/bookings', require('./Booking'));

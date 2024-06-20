@@ -4,8 +4,7 @@ const userToken = require('../Token/userToken');
 exports.createBookings = async (req, res) => {
   try {
     const userData = userToken(req);
-    const { place, checkIn, checkOut, numOfGuests, username, phone, price } =
-      req.body;
+    const { place, checkIn, checkOut, numOfGuests, username, phone, price } = req.body;
 
     const booking = await Bookings.create({
       user: userData.id,
@@ -22,28 +21,22 @@ exports.createBookings = async (req, res) => {
       booking,
     });
   } catch (err) {
-    res.send({ Err: err });
+    res.status(500).json({ error: err.message });
   }
 };
 
 exports.getBookings = async (req, res) => {
   try {
     const userData = userToken(req);
-    console.log("UD", userToken);
     if (!userData) {
-      return res
-        .status(401)
-        .json({ error: 'You are not authorized to access this page!' });
+      return res.status(401).json({ error: 'You are not authorized to access this page!' });
     }
 
-    const booking = await Bookings.find({ user: userData.id }).populate(userData.place)
+    const bookings = await Bookings.find({ user: userData.id }).populate('place');
 
-    res
-      .status(200).json({ booking, success: true })
-
-
+    res.status(200).json({ bookings, success: true });
   } catch (err) {
-    console.log(err);
-    res.send({ Errornow: err });
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 };
