@@ -40,7 +40,6 @@ exports.signup = async (req, res) => {
     });
   }
 };
-
 exports.signin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -88,6 +87,7 @@ exports.signin = async (req, res) => {
     });
   }
 };
+
 exports.userprofile = async (req, res) => {
   try {
     const userData = req.user;
