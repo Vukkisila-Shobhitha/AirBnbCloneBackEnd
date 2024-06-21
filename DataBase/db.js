@@ -1,21 +1,15 @@
-const mongoose = require("mongoose");
-
-const dbConnect = () => {
-    mongoose.set('strictQuery', false);
-    mongoose
-      .connect(process.env.MONGO_URL, {
-        // Remove useNewUrlParser and useUnifiedTopology
-        // useNewUrlParser: true,
-        // useUnifiedTopology: true,
-      })
-      .then(() => {
-        console.log(`DB connected`);
-      })
-      .catch((err) => {
-        console.log(`DB not connected`);
-        console.error(err);
-        process.exit(1);
-      });
+const mongoose = require('mongoose');
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('MongoDB connected');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
 };
 
-module.exports = dbConnect;
+module.exports = connectDB;

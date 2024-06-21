@@ -6,18 +6,11 @@ const {
   userprofile,
   signout,
 } = require('../Controller/UserController');
+const auth = require('../Middleware/auth');
 
-// Define routes and connect them to respective controller functions
-router.route('/signup')
-  .post(signup);
-
-router.route('/signin')
-  .post(signin);
-
-router.route('/userprofile')
-  .get(userprofile);
-
-router.route('/signout')
-  .post(signout);
+router.route('/signup').post(signup);
+router.route('/signin').post(signin);
+router.route('/userprofile').get(auth, userprofile); // Ensure authentication for user profile
+router.route('/signout').post(signout);
 
 module.exports = router;

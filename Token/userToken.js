@@ -13,11 +13,3 @@ const userToken = (req, res) => {
 };
 
 module.exports = userToken;
-
-
-
-
-
-
-
-
