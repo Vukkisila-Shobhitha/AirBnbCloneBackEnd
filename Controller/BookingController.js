@@ -1,5 +1,6 @@
 const Bookings = require('../Schema/Bookings');
 const userToken = require('../Token/userToken');
+//const auth = require('../Middleware/auth');
 
 exports.createBookings = async (req, res) => {
   try {
@@ -27,7 +28,7 @@ exports.createBookings = async (req, res) => {
 
 exports.getBookings = async (req, res) => {
   try {
-    const userData = userToken(req);
+    const userData = req.user;
     if (!userData) {
       return res.status(401).json({ error: 'You are not authorized to access this page!' });
     }
